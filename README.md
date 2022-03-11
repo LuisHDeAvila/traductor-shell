@@ -1,2 +1,2 @@
 # traductor-de-terminal
-script traductor para terminal. y puede convertir pdf a texto y generar sintesis de voz
+Este script es un procedimiento muy repetitivo en dia a dia, pues al obtener documentos pdf con google dorks, no todos son muy entretenidos, pero al poder convertirlos a 'solo texto' se pueden enviar a un motor de sintesis de voz, como sabina. de Microsoft, que abriendo su navegador EDGE, puedes escuchar su dulce voz narrarte como realizar una explotacion en un sistema scada, solo con nmap y hashcat. (es broma)
