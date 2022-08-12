@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# traductor de terminal.
+if [ "$#" -eq 0 ]; then
+  echo -e "\e[1;34;40m"
+  echo ' --=| traductor de terminal -- desde cualquier idioma al castellano |=--'
+  echo -e "\n\tUSO:\t \t${0} [fichero de texto]" 
+  echo -e "\tEJEMPLO: \t./traductor sentences.txt\e[m\n" && exit
+fi
+
+( ls ~/traducciones || mkdir ~/traducciones ) >/dev/null
+TRADUCCIONES=~/traducciones
+
+# comprobacion de entradas
+if [ `file "$1" | grep -c 'text'` -ne 0 ]; then
+        input="$1"
+else
+        echo 'entrada no valida, se esperaba un archivo de texto' && exit
+fi
+command -V trans || echo 'porfavor instala el paquete translate-shell para ejecutar este scipt' && exit 
+
+# traductor
+function traductor()
+{
+cat "$1" | grep -E '.+' | while read line
+do
+
+echo "$line" | trans -b :es &
+( ps ax | grep 'translate.goog' | awk '{print $1}' | xargs kill ) || true >/dev/null
+
+done 2>/dev/null 1>~/traducciones/$1_es.txt
+}
+
+# main
+(traductor "$input" &) && echo "se traducira $input en $TRADUCCIONES/$1_es.txt"
