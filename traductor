@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# author: eleache
 # traductor de linea de comandos
 
 TRADUCCIONES=~/traducciones
