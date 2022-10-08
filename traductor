@@ -1,8 +1,20 @@
 #!/usr/bin/env bash
 # traductor de linea de comandos
 
-TRADUCCIONES=~/pdfs/traducciones
+TRADUCCIONES=~/traducciones
 DESTINO=$TRADUCCIONES/$1_es.txt
+
+# funciones de mantenimiento en pre-ejecucion
+[[ -e $TRADUCCIONES ]] || mkdir traducciones
+function instalaporfavor(){
+cat << 'INSTALA'
+se necesita translate-shell, porfavor entra al repositorio oficial y 
+sigue las instrucciones para instalar translate-shell
+
+repositorio -> https://github.com/soimort/translate-shell
+INSTALA
+}
+command -V trans || instalaporfavor
 
 # verifica que la entrada sea un archivo de texto
 if [ `file "$1" | grep -c 'text'` -ne 0 ]; then
@@ -11,27 +23,24 @@ else
 	echo ' !! entrada no valida, se esperaba un archivo de texto !!' && exit
 fi
 
-function showmessage()
-{
+function showmessage() {
 echo -e "\n\t\e[1;34;40m ${@} \e[m \n"
 }
 
-function traductor()
-{
-echo 'traductor: presiona CTRL + C o espera a que finalize la traduccion'
-cat "$1" | grep -E '.+' | while read line; do
-### The main function ########################
-echo "$line" | trans -u "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0" -no-browser -b :es &
-######################## The main function ###
-# mata posibles subprocesos inicializados por error
-( ps ax | grep 'translate.goog' | awk '{print $1}' | xargs kill ) || true >/dev/null
-# envia errores(2) a /dev/null y salidas exitosas(1) al destino de traduccion
-done 2>/dev/null 1>~/pdfs/traducciones/$1_es.txt
-exit
+function traductor() {
+	showmessage 'traductor: presiona CTRL + C o espera a que finalize la traduccion'
+	cat "$1" | grep -E '.+' | while read line; do
+	### The main function ########################
+		echo "$line" | trans -u "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0" -no-browser -b :es &
+	######################## The main function ###
+	# mata posibles subprocesos inicializados por error
+		( ps ax | grep 'translate.goog' | awk '{print $1}' | xargs kill ) || true >/dev/null
+	# envia errores(2) a /dev/null y salidas exitosas(1) al destino de traduccion
+	done 2>/dev/null 1>$DESTINO
+	exit
 }
 
-animation()
-{
+animation() {
 chars="/-\|"
 while :; do
 	for (( i=0; i<${#chars}; i++ )); do
@@ -41,17 +50,14 @@ while :; do
 done
 }
 
-function logprogress()
-{
+function logprogress() {
 tput civis
 while :; do
 	Loger=`tail -1 "${DESTINO}"`
 	echo -ne "\e[1;33;40m    `wc -l "${ENTRADA}" | awk '{print $1}'` / `wc -l "${DESTINO}" | awk '{print $1}'` [\e[m  `echo ${Loger::30}`  \e[1;33;40m]\e[m\r"
 done
 }
-
 trap ctrl_c INT
-
 function ctrl_c(){
 	echo -e "\n\n\e[1;33;40m [*]Pasando a segundo plano...\e[m\n\n"
 	tput cnorm
