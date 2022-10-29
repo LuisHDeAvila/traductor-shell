@@ -1,0 +1,14 @@
+# Animation
+animation() {
+  tput civis
+  local chars='bpdqbpdq'
+  while :
+    do
+      local logprogress=$(tail -1 $TRADUCCIONES/$ENTRADA_es.txt )
+      for (( i=1; i<${#chars}; i++ ))
+        do
+          sleep 0.05
+          echo -en "\t  traduciendo [\e[3${i::1}m${chars:$i:1}\e[0m] | ${logprogress::60}  \e[m\r"
+      done
+  done
+}

@@ -5,12 +5,13 @@
 '
 [[ -d data ]] && echo "atencion: directorio /data/ esta presente y todo dentro de el sera ignorado"
 function pre_ejecution(){
-local enumeracion=$(find . | grep 'pdf$' | grep -v '/data' | wc -l)
-echo "Se encontraron $enumeracion ficheros para procesar"
+	local enumeracion=$(find . | grep 'pdf$' | grep -v '/data' | wc -l)
+	echo "Se encontraron $enumeracion ficheros para procesar"
 }
 
 pre_ejecution
 read -p " presiona [ENTER] para continuar " CONSENTIMIENTO
+
 # renombrar con los siguientes criterios: el nombre solo contiene letras en minusculas y/o numeros.
 function renombrarficheros(){
 	[[ -d data ]] || mkdir data
@@ -55,12 +56,21 @@ done
 }
 
 function preparar-revision(){
-local database=Traducciones.json
-echo "  traducciones: [" > $database
+#local database=Traducciones.json
+#echo "  traducciones: [" > $database
 
 ls *.txt | while read fichero; do
 	echo $fichero
 done 2>/dev/null
 
-echo "];" >> $database
+# echo "];" >> $database
 }
+
+function iterar(){
+ls *.txt | head -1 | while read fichero; do
+	echo "$fichero"
+	trans -b :es <( strings $fichero )> $ficherotraducido
+done
+}
+
+iterar

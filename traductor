@@ -1,49 +1,45 @@
 #!/usr/bin/env bash
-# traductor de linea de comandos
+: '
+  Utilidad de bash para traducir ficheros desde la linea de comandos
+  De <cualquier idioma> a <espanol>.
+'
 set -e
-TRADUCCIONES=~/pdfs/traducciones
-DESTINO=$TRADUCCIONES/$1_es.txt
-THISFUNCTION=$$
+TRADUCCIONES=~/Traducciones
 
-  # estilos para prompt
+# estilos para prompt
   showmessage(){ echo -e "  \e[1;34;40m${@}\e[m" ;}
   showerror(){ echo -e "  \e[1;31;40m${@}\e[m" ;}
+  trap ctrl_c INT
+  ctrl_c(){ showerror "[*]Saliendo...\e[m\n" && tput cnorm && exit 0 ;}
 
 # verifica que la entrada sea un archivo de texto
-if [ `file "$1" | grep -c 'text'` -ne 0 ]; then
-	ENTRADA="$1"
-else
-	showerror ' !! entrada no valida, se esperaba un archivo de texto !!' && exit
-fi
+  if [ `file "$1" | grep -c 'text'` -ne 0 ]
+    then
+      ENTRADA="$1"
+    else
+      showerror ' !! entrada no valida, se esperaba un archivo de texto !!' && exit
+  fi
 
-  animation() {
-    tput civis
-    chars="bpdqbpdq"
-    while :; do
-      local logprogress=$(tail -1 $DESTINO | sed 's/(\"|"|\n)+//g' )
-      for (( i=1; i<${#chars}; i++ )); do
-        sleep 0.05
-        echo -en "\t  traduciendo [\e[3${i::1}m${chars:$i:1}\e[0m] | ${logprogress::39}  \e[m\r"
-      done
-    done
-  }
+# verifica dependencias
+  solve-dependencies(){ source ./src/dependencies && install_translate-shell ;}
+  ( command -V trans || solve-dependencies )> /dev/null
+  ls $TRADUCCIONES || mkdir $TRADUCCIONES >/dev/null
+  source ./src/animation
 
-  traductor() {
-    local entry=$1
-    local flaganimation
-    animation & > $flaganimation
-    function principal(){ echo "$(strings $entry)" | trans -u "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0" -no-browser -b :es ;}
-    ( principal ) 2>/dev/null 1>$DESTINO
-
-    tput civis
-    kill $flaganimation
+traductor(){
+    local Entry=$1
+    local Output=$TRADUCCIONES/$Entry_es.txt
+    touch "$Output"
+    echo "$(strings $Entry)" \
+      | trans -u "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"\
+        -no-browser -b :es 2>/dev/null 1>$Output
     exit
-  }
-
-  trap ctrl_c INT
-  function ctrl_c(){ showerror "[*]Saliendo...\e[m\n" && tput cnorm && exit 0 ;}
-  function initflag(){ traductor "$ENTRADA" ;}
+}
 
 # main
+initflag(){ 
+  animation &
+  traductor "$ENTRADA"
+  kill %2
+  }
 showmessage '['"$1"'] ====================> ['"$TRADUCCIONES"']' && initflag
-kill $THISFUNCTION
