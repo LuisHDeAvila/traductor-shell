@@ -1,8 +1,8 @@
 # Dependencies
 install_translate-shell(){
   showmessage "installing dependencies.. "
-  wget git.io/trans
-  chmod +x ./trans
+  wget git.io/trans 
+  chmod +x trans
   ./trans
 }
 
